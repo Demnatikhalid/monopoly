@@ -1,0 +1,5 @@
+.browser-check/
+server.pid
+server.log
+server-error.log
+preview-*.png
