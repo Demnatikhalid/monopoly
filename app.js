@@ -4,8 +4,9 @@ let state=null,selected=-1,busy=false,animating=false,pollPromise=null,lastEvent
 const positions=new Map(),sleep=ms=>new Promise(r=>setTimeout(r,ms)),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>Number(n).toLocaleString('fr-FR');
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? '' : (window.API_URL || '');
 function toast(text){$('#toast').textContent=text;$('#toast').style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('#toast').style.display='none',4500)}
-async function api(path,data){const response=await fetch(path,{method:data?'POST':'GET',headers:data?{'Content-Type':'application/json'}:{},body:data?JSON.stringify(data):undefined,signal:AbortSignal.timeout(10000)});const result=await response.json();if(!response.ok)throw Error(result.error||'Erreur serveur');return result}
+async function api(path,data){const response=await fetch(API_BASE+path,{method:data?'POST':'GET',headers:data?{'Content-Type':'application/json'}:{},body:data?JSON.stringify(data):undefined,signal:AbortSignal.timeout(10000)});const result=await response.json();if(!response.ok)throw Error(result.error||'Erreur serveur');return result}
 function resetView(){generation++;state=null;selected=-1;lastEvent=0;positions.clear();$('#board').querySelectorAll('.tile').forEach(n=>n.remove());$('#token-layer').replaceChildren();closeCard();animating=false;document.body.classList.remove('animating')}
 async function enter(create,mode){
  if(busy)return;if(!$('#name').value.trim()){toast('Saisissez votre prénom pour jouer.');$('#name').focus();return}
