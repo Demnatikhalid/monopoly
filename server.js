@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 8787;
@@ -10,8 +11,40 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// Game state storage
-const rooms = new Map();
+// Game state storage with persistence
+const STORAGE_FILE = '/tmp/monopoly-rooms.json';
+let rooms = new Map();
+
+// Load rooms from storage on startup
+function loadRooms() {
+    try {
+        if (fs.existsSync(STORAGE_FILE)) {
+            const data = fs.readFileSync(STORAGE_FILE, 'utf8');
+            const parsed = JSON.parse(data);
+            rooms = new Map(Object.entries(parsed));
+            console.log(`Loaded ${rooms.size} rooms from storage`);
+        }
+    } catch (error) {
+        console.error('Error loading rooms:', error);
+        rooms = new Map();
+    }
+}
+
+// Save rooms to storage
+function saveRooms() {
+    try {
+        const obj = Object.fromEntries(rooms);
+        fs.writeFileSync(STORAGE_FILE, JSON.stringify(obj), 'utf8');
+    } catch (error) {
+        console.error('Error saving rooms:', error);
+    }
+}
+
+// Auto-save every 5 seconds
+setInterval(saveRooms, 5000);
+
+// Load on startup
+loadRooms();
 
 // Utility functions
 function newTiles() {
