@@ -1163,6 +1163,16 @@ app.get('/api/state', (req, res) => {
                     copy[k] = player[k];
                 }
             }
+            
+            // Add inactivity timer for non-bot players
+            if (!player.bot && !player.out && s.lastSeen[player.id]) {
+                const inactive = Date.now() - s.lastSeen[player.id];
+                const timeout = 120000; // 2 minutes
+                const remaining = Math.max(0, timeout - inactive);
+                copy.inactiveSeconds = Math.floor(inactive / 1000);
+                copy.timeoutSeconds = Math.floor(remaining / 1000);
+            }
+            
             return copy;
         });
         
